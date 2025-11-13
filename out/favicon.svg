@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    @font-face {
+      font-family: 'NewsreaderFavicon';
+      src: url('/fonts/Newsreader.woff2') format('woff2');
+      font-weight: 200 800;
+      font-style: normal;
+    }
+
+    text {
+      font-family: 'NewsreaderFavicon', 'Times New Roman', serif;
+      font-size: 32px;
+      font-weight: 600;
+      fill: #0f172a;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+  </style>
+  <rect width="64" height="64" rx="12" fill="#e2e8f0" />
+  <text x="32" y="32">jc</text>
+</svg>
