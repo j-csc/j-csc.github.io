@@ -1,8 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { cache } from 'react';
 import matter from 'gray-matter';
 import { remark } from 'remark';
-import html from 'remark-html';
+import remarkMath from 'remark-math';
+import remarkRehype from 'remark-rehype';
+import rehypeKatex from 'rehype-katex';
+import rehypeStringify from 'rehype-stringify';
 
 const contentDirectory = path.join(process.cwd(), 'content');
 
@@ -32,14 +36,25 @@ function normalizeSlug(fileName: string): string {
   return fileName.replace(/\.md$/, '');
 }
 
-export async function getPostSlugs(): Promise<string[]> {
-  const entries = await fs.readdir(contentDirectory, { withFileTypes: true });
+async function readContentDirectory() {
+  try {
+    return await fs.readdir(contentDirectory, { withFileTypes: true });
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && (error as { code?: string }).code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+}
+
+export const getPostSlugs = cache(async (): Promise<string[]> => {
+  const entries = await readContentDirectory();
   return entries
     .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
     .map((entry) => normalizeSlug(entry.name));
-}
+});
 
-export async function getAllPosts(): Promise<PostMeta[]> {
+export const getAllPosts = cache(async (): Promise<PostMeta[]> => {
   const slugs = await getPostSlugs();
   const posts = await Promise.all(
     slugs.map(async (slug): Promise<PostMeta | null> => {
@@ -50,27 +65,24 @@ export async function getAllPosts(): Promise<PostMeta[]> {
       }
 
       const { data } = matter(file);
-      const meta: PostMeta = {
+      return {
         slug,
         title: data.title ?? slug,
         description: data.description,
-        date: data.date,
-      };
-
-      return meta;
+        date: data.date
+      } satisfies PostMeta;
     })
   );
 
   const definedPosts = posts.filter((post): post is PostMeta => post !== null);
-
   return definedPosts.sort((a, b) => {
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
     return dateB - dateA;
   });
-}
+});
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
   const filePath = path.join(contentDirectory, `${slug}.md`);
   const file = await readMarkdownFile(filePath);
 
@@ -79,13 +91,18 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   }
 
   const { data, content } = matter(file);
-  const processed = await remark().use(html).process(content);
+  const processed = await remark()
+    .use(remarkMath)
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeKatex)
+    .use(rehypeStringify, { allowDangerousHtml: true })
+    .process(content);
 
   return {
     slug,
     title: data.title ?? slug,
     description: data.description,
     date: data.date,
-    content: processed.toString(),
+    content: processed.toString()
   } satisfies Post;
-}
+});

@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { getPostBySlug, getPostSlugs } from '@/lib/posts';
 
 type PageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 function formatDate(input?: string) {
@@ -15,13 +15,9 @@ function formatDate(input?: string) {
   return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-export async function generateStaticParams() {
-  const slugs = await getPostSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
   if (!post) {
     return {
       title: 'Not found'
@@ -34,21 +30,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+export async function generateStaticParams() {
+  const slugs = await getPostSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
+
 export default async function PostPage({ params }: PageProps) {
-  const post = await getPostBySlug(params.slug);
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
   return (
-    <article className="post">
-      <Link href="/" className="back-link">
-        ← Back home
-      </Link>
-      <h1>{post.title}</h1>
-      {post.date && <time dateTime={post.date}>{formatDate(post.date)}</time>}
-      <div className="post-body" dangerouslySetInnerHTML={{ __html: post.content }} />
+    <article className="space-y-4">
+      <span className='flex items-center justify-between'>
+        <Link href="/" className="inline-flex items-center text-sm text-slate-500 transition hover:text-slate-900">
+          ← Back home
+        </Link>
+        {post.date && (
+          <time className="text-sm text-slate-500" dateTime={post.date}>
+            {formatDate(post.date)}
+          </time>
+        )}
+      </span>
+      <div className="markdown" dangerouslySetInnerHTML={{ __html: post.content }} />
     </article>
   );
 }
