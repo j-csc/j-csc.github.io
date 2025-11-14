@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import type { Dirent } from 'node:fs';
 import path from 'node:path';
 import { cache } from 'react';
 import matter from 'gray-matter';
@@ -10,8 +11,15 @@ import rehypeStringify from 'rehype-stringify';
 
 const contentDirectory = path.join(process.cwd(), 'content');
 
+type MarkdownEntry = {
+  slug: string;
+  segments: string[];
+  filePath: string;
+};
+
 export type PostMeta = {
   slug: string;
+  segments: string[];
   title: string;
   description?: string;
   date?: string;
@@ -36,29 +44,60 @@ function normalizeSlug(fileName: string): string {
   return fileName.replace(/\.md$/, '');
 }
 
-async function readContentDirectory() {
+async function collectMarkdownEntries(dirPath: string, relativeSegments: string[] = []): Promise<MarkdownEntry[]> {
+  let dirEntries: Dirent[];
   try {
-    return await fs.readdir(contentDirectory, { withFileTypes: true });
+    dirEntries = await fs.readdir(dirPath, { withFileTypes: true });
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error && (error as { code?: string }).code === 'ENOENT') {
       return [];
     }
     throw error;
   }
+
+  const entries: MarkdownEntry[] = [];
+  for (const entry of dirEntries) {
+    const nextPath = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      const nestedEntries = await collectMarkdownEntries(nextPath, [...relativeSegments, entry.name]);
+      entries.push(...nestedEntries);
+      continue;
+    }
+
+    if (entry.isFile() && entry.name.endsWith('.md')) {
+      const segments = [...relativeSegments, normalizeSlug(entry.name)];
+      entries.push({
+        slug: segments.join('/'),
+        segments,
+        filePath: nextPath
+      });
+    }
+  }
+
+  return entries;
+}
+
+function slugToSegments(slug: string): string[] | null {
+  const segments = slug.split('/').filter(Boolean);
+  if (segments.length === 0) {
+    return null;
+  }
+
+  const isValid = segments.every((segment) => !segment.includes('..') && !segment.includes(path.sep));
+  return isValid ? segments : null;
 }
 
 export const getPostSlugs = cache(async (): Promise<string[]> => {
-  const entries = await readContentDirectory();
+  const entries = await collectMarkdownEntries(contentDirectory);
   return entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-    .map((entry) => normalizeSlug(entry.name));
+    .map((entry) => entry.slug)
+    .sort((a, b) => a.localeCompare(b));
 });
 
 export const getAllPosts = cache(async (): Promise<PostMeta[]> => {
-  const slugs = await getPostSlugs();
+  const entries = await collectMarkdownEntries(contentDirectory);
   const posts = await Promise.all(
-    slugs.map(async (slug): Promise<PostMeta | null> => {
-      const filePath = path.join(contentDirectory, `${slug}.md`);
+    entries.map(async ({ slug, segments, filePath }): Promise<PostMeta | null> => {
       const file = await readMarkdownFile(filePath);
       if (!file) {
         return null;
@@ -67,6 +106,7 @@ export const getAllPosts = cache(async (): Promise<PostMeta[]> => {
       const { data } = matter(file);
       return {
         slug,
+        segments,
         title: data.title ?? slug,
         description: data.description,
         date: data.date
@@ -83,7 +123,12 @@ export const getAllPosts = cache(async (): Promise<PostMeta[]> => {
 });
 
 export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
-  const filePath = path.join(contentDirectory, `${slug}.md`);
+  const segments = slugToSegments(slug);
+  if (!segments) {
+    return null;
+  }
+
+  const filePath = path.join(contentDirectory, ...segments) + '.md';
   const file = await readMarkdownFile(filePath);
 
   if (!file) {
@@ -100,6 +145,7 @@ export const getPostBySlug = cache(async (slug: string): Promise<Post | null> =>
 
   return {
     slug,
+    segments,
     title: data.title ?? slug,
     description: data.description,
     date: data.date,

@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { getPostBySlug, getPostSlugs } from '@/lib/posts';
 
 type PageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string[] }>;
 };
 
 function formatDate(input?: string) {
@@ -17,7 +17,14 @@ function formatDate(input?: string) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const slugPath = Array.isArray(slug) ? slug.join('/') : '';
+  if (!slugPath) {
+    return {
+      title: 'Not found'
+    };
+  }
+
+  const post = await getPostBySlug(slugPath);
   if (!post) {
     return {
       title: 'Not found'
@@ -32,12 +39,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export async function generateStaticParams() {
   const slugs = await getPostSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugs.map((slug) => ({ slug: slug.split('/') }));
 }
 
 export default async function PostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const slugPath = Array.isArray(slug) ? slug.join('/') : '';
+  if (!slugPath) {
+    notFound();
+  }
+
+  const post = await getPostBySlug(slugPath);
 
   if (!post) {
     notFound();
