@@ -31,8 +31,7 @@ $$
 
 where $W_Q$, $W_K$, and $W_V$ are learned projection matrices. We then compute the attention scores using the dot product of Q and K, scaled by the square root of the dimensionality of the key vectors ($d_k$):
 $$
-\text{Attention}(Q, K, V) = \text{softmax}\left
-\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
 $$
 
 So $QK^T$ gives us a matrix of attention scores indicating how much each token should attend to every other token. The softmax function normalizes these scores into probabilities, which are then used to weight the value vectors $V$. The weighing of the value vectors tells the model how much information to pull from each token when constructing the output representation.
