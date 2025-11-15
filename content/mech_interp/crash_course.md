@@ -1,7 +1,7 @@
 ---
-title: Prereqs for Mech Interp
-description: Prereqs and intuitions behind Mech Interp and preparation for "A Mathematical Framework for Transformer Circuits"
-date: 2025-11-13
+title: Mech Interp Crash Course
+description: Crash course on Mech Interp, drawn from notes on "A Mathematical Framework for Transformer Circuits"
+date: 2025-11-15
 ---
 
 > "The core problem of getting started on mech interp is needing to solve the curse of dimensionality." To start, I'll try and unpack most concepts [on this lesswrong article](https://www.lesswrong.com/posts/jP9KDyMkchuv6tHwm/how-to-become-a-mechanistic-interpretability-researcher) and [A Mathematical Framework for Transformer Circuits](https://arxiv.org/abs/2302.13971).
@@ -80,19 +80,19 @@ For each token in the input sequence, the transformer maintains a residual repre
 
 At each layer we:
 
-First read from the residual via layer normalization:
+First read from the residual $r$ via layer normalization:
 $$
-\text{Residual}_{l} = \text{LayerNorm}(\text{Residual}_{l-1} + \text{LayerOutput}_l)
+\text{r}_{l} = \text{LayerNorm}(\text{r}_{l-1} + \text{LayerOutput}_l)
 $$
 The attention block then writes into the residual stream by attending to other tokens and pulling in relevant information. 
 $$
 \text{AttentionOutput} = \text{Attention}(Q, K, V)
-\text{Residual}_{l} = \text{Residual}_{l-1} + \text{AttentionOutput}
+\text{r}_{l} = \text{r}_{l-1} + \text{AttentionOutput}
 $$
 The MLP block then writes into the residual stream by transforming the token's representation based on learned features.
 $$
-\text{MLPOutput} = \text{MLP}(\text{Residual}_{l})
-\text{Residual}_{l} = \text{Residual}_{l-1} + \text{MLPOutput}
+\text{MLPOutput} = \text{MLP}(\text{r}_{l})
+\text{r}_{l} = \text{r}_{l-1} + \text{MLPOutput}
 $$
 
 Everything here is additive and compositional. Each layer's output is simply added to the existing residual representation, allowing the model to build up complex features and relationships over multiple layers. It makes these things dense since all information such as "which 
