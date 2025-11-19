@@ -4,11 +4,11 @@ description: Crash course on Mech Interp, drawn from notes on "A Mathematical Fr
 date: 2025-11-15
 ---
 
-> "The core problem of getting started on mech interp is needing to solve the curse of dimensionality." To start, I'll try and unpack most concepts [on this lesswrong article](https://www.lesswrong.com/posts/jP9KDyMkchuv6tHwm/how-to-become-a-mechanistic-interpretability-researcher) and [A Mathematical Framework for Transformer Circuits](https://arxiv.org/abs/2302.13971).
+> "The core problem of getting started on mech interp is needing to solve the curse of dimensionality." - Neel Nanda. To start, I'll try and unpack most concepts [on this lesswrong article](https://www.lesswrong.com/posts/jP9KDyMkchuv6tHwm/how-to-become-a-mechanistic-interpretability-researcher) and [A Mathematical Framework for Transformer Circuits](https://arxiv.org/abs/2302.13971).
 
 ## Mech Interp Overview
 
-In part of larger alignment related work, mech interp is the first ditch attempt at understanding how models work by way of reverse engineering. This article will focus on [A Mathematical Framework for Transformer Circuits](https://arxiv.org/abs/2302.13971) and be built upon my other [notes](http://j-csc.github.io/on-transformers) for intuitions and prereqs I need to continue learning about mech interp.   
+In part of larger alignment related work, mech interp is just a way of understanding how models work by reverse engineering the internals. Most of this article is focusing on [A Mathematical Framework for Transformer Circuits](https://arxiv.org/abs/2302.13971) and will be built upon my other [notes](http://j-csc.github.io/on-transformers) for intuitions and prereqs.   
 
 ## QKV and Attention Recap
 
@@ -95,12 +95,25 @@ $$
 \text{r}_{l} = \text{r}_{l-1} + \text{MLPOutput}
 $$
 
-Everything here is additive and compositional. Each layer's output is simply added to the existing residual representation, allowing the model to build up complex features and relationships over multiple layers. It makes these things dense since all information such as "which 
+Everything here is additive. Each layer's output is simply added to the existing residual representation, allowing the model to build up complex features and relationships over multiple layers. It makes these things dense since all information such as "which token is what" is stored in the same residual stream.
+
+> Note how **change of basis** happens and information is routed from residual stream to QKV (Query basis, Key basis, Value basis) and back to residual stream again.
 
 ## Intuition for Multi-head Attention
 
-## LayerNorm
+Multi-head attention allows the model to attend to different parts of the input sequence simultaneously, capturing various relationships and features. Each head has its own set of learned projection matrices for Q, K, and V, allowing it to focus on different aspects of the input.
+For each head $i$, we compute:
+$$
+Q_i = XW_{Q_i}, \quad K_i = XW_{K_i}, \quad V_i = XW_{V_i}
+$$
+Then, we compute the attention output for each head:
+$$
+\text{Attention}_i = \text{softmax}\left(\frac{Q_iK_i^T}{\sqrt{d_k}}\right)V_i
+$$
+Finally, we concatenate the outputs of all heads and project them back to the original dimensionality:
+$$
+\text{MultiHead}(Q, K, V) = \text{Concat}(\text{Attention}_1, \text{Attention}_2, ..., \text{Attention}_h)W_O
+$$
+where $W_O$ is the output projection matrix.
 
-## Geometric Intuition of Transformers
-
-## Induction Heads and Simple Circuits
+The reason is for example if we have 2 heads, one head might focus on syntactic relationships like subject-verb agreement, while another head might focus on other relationships like whether a topic is relevant. By having multiple heads, the model can capture a richer set of features and interactions within the input sequence. 
