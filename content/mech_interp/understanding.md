@@ -110,7 +110,6 @@ In a pre-LN decoder-only transformer, a typical layer looks like:
    \text{r}_{l} = \text{r}'_{l} + \text{MLPOutput}
    $$
 
-
 Everything here is additive. Each layer's output is simply added to the existing residual representation, allowing the model to build up complex features and relationships over multiple layers. The residual stream stores a direction representing the accumulated features - all components read from and write into this shared space, making it a dense representation where features from different layers coexist.
 
 > Note how **change of basis** happens and information is routed from residual stream to QKV (Query basis, Key basis, Value basis) and back to residual stream again.
@@ -164,11 +163,11 @@ While the paper is dense and required multiple reads to fully digest, it still i
 
 Still, it is an exciting first step learning about the building blocks (residual streams, attention-MLP decomposition, QK/OV circuits, induction heads) given the fact that there are a large number of open questions in the field compounded by the fact that there are new paradigms like reasoning models and mixture of experts that are being explored.
 
-
 ## What I Want to Try Next
 
-This post is mostly about building the mental scaffolding I need to even read mech interp work without getting lost in the sauce. But I don’t want this to stay purely theoretical, so here's a project I’d like to try next:
-**A small web app - good fire style clone**
+This post is mostly about building the mental scaffolding I need to even read mech interp work without getting lost in the sauce. But I don't want this to stay purely theoretical, so here's a project I'd like to try next:
+
+### A small web app - Goodfire-style clone
 - loads a small transformer (e.g. GPT-2 small) with hooks
 - runs attention and MLP forward passes on a given prompt  
 - visualizes attention patterns and residual stream activations over layers
