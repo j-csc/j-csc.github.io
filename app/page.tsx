@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { getAllPosts, type PostMeta } from '@/lib/posts';
 
 const bioParagraphs = [
-  `Jason is a software engineer that works in Electronic Trading, focused on low-latency systems. He builds strategy optimizers that reduce execution costs and experiments with agents plus large-scale RAG infrastructure for a living.`,
-  `Before working in the trading space, he interned at Apple's SaLT as a machine learning engineer on Siri, worked on CV research, and built U-Net-based models for geospatial landcover prediction.`,
-  `In his free time, he contributes to open source projects like LangChain and MLX.`
+  `Jason is a software engineer that works in Electronic Trading, focused on mid to low-latency systems. He builds strategies that reduce execution costs and experiments with agents and large-scale RAG infrastructure for a living.`,
+  `Before working in the trading space, he was a machine learning engineer on Siri, worked on CV research, and experimented with geospatial predictions.`,
+  `In his free time, he contributes to open source projects.`
 ];
 
 function formatDate(input?: string) {
