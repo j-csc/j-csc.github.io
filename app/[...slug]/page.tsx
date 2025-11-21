@@ -56,17 +56,27 @@ export default async function PostPage({ params }: PageProps) {
   }
 
   return (
-    <article className="space-y-4">
-      <span className='flex items-center justify-between'>
-        <Link href="/" className="inline-flex items-center text-sm text-slate-500 transition hover:text-slate-900">
-          ← Back home
-        </Link>
+    <article className="space-y-8">
+      <Link href="/" className="inline-flex items-center text-sm text-slate-500 transition hover:text-slate-900">
+        ← Back home
+      </Link>
+
+      <header className="space-y-4 border-b border-slate-200 pb-8">
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+          {post.title}
+        </h1>
         {post.date && (
-          <time className="text-sm text-slate-500" dateTime={post.date}>
+          <time className="block text-sm text-slate-500" dateTime={post.date}>
             {formatDate(post.date)}
           </time>
         )}
-      </span>
+        {post.description && (
+          <p className="text-lg text-slate-600">
+            {post.description}
+          </p>
+        )}
+      </header>
+
       <div className="markdown" dangerouslySetInnerHTML={{ __html: post.content }} />
     </article>
   );
