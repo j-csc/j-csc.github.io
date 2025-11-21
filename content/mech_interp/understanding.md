@@ -75,9 +75,9 @@ $$
 \text{r}_{l} = \text{r}_{l-1} + \text{MLPOutput}
 $$
 
-Here, we're essentially first projecting the input into a higher-dimensional space (via $W_1$) where we can represent many features simultaneously. The non-linear activation will activate features and tell us "which of the x number of features this token activates". We then project it back down to the original dimensionality (via $W_2$) so we can store it back into the residual stream (working memory). The concept on $W_2$ being a "write" matrix is important since it literally pushes tokens in specific semantic directions.
-
 > It's key to understand that attention heads simply route information between tokens while MLPs help create and represent features about those tokens. For downstream mech interp ideas like **steering vectors** (a technique for directly influencing model behavior by adding vectors to the residual stream), we can add or subtract directions derived from MLP write vectors (columns of $W_2$ or combinations of them) to manipulate the residual stream in a desired direction.
+
+Here, we're essentially first projecting the input into a higher-dimensional space (via $W_1$) where we can represent many features simultaneously. The non-linear activation will activate features and tell us "which of the x number of features this token activates". We then project it back down to the original dimensionality (via $W_2$) so we can store it back into the residual stream (working memory). The concept on $W_2$ being a "write" matrix is important since it literally pushes tokens in specific semantic directions.
 
 ### Residual Stream
 
