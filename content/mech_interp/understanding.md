@@ -27,8 +27,6 @@ Conceptually the model makes three different representations of the input: Query
 - Value ($V$): A vector encoding the information/content of this token.
     - "The content of this token is 'quick'"
 
-> Q finds K and V carries the information.
-
 So given an input sequence of token embeddings $X = [x_1, x_2, ..., x_n]$, we compute the Q, K, and V matrices as follows:
 
 $$
@@ -168,13 +166,6 @@ Still, it is an exciting first step learning about the building blocks (residual
 
 ## What I Want to Try Next
 
-This post is mostly about building the mental scaffolding I need to even read mech interp work without getting lost in the sauce. But I don't want this to stay purely theoretical, so here's a project I'd like to try next:
+This post is mostly about building the mental scaffolding I need to even read mech interp work without getting lost in the sauce. But I don't want this to stay purely theoretical, so here's a project I'd like to try next - A small web app that is a **Goodfire-style** clone that lets me play around with visualizations of attention patterns / residual stream activations. It should also have steering / activation patching demos so I can try simple control techniques.
 
-### A small web app - Goodfire-style clone
-- loads a small transformer (e.g. GPT-2 small) with hooks
-- runs attention and MLP forward passes on a given prompt  
-- visualizes attention patterns and residual stream activations over layers
-- lets me toggle simple interventions (e.g. zeroing a head, patching an activation)
-- demo steering vectors
-
-None of this is polished or anywhere close to lab level research. But I'm leaving this post up as a baseline for my intuition building starting point.
+> None of this is polished or anywhere close to lab level research. But I'm leaving this post up as a baseline for my intuition building starting point.
