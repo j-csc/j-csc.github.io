@@ -45,7 +45,31 @@ function groupPostsByFolder(posts: PostMeta[]) {
   });
 
   return Array.from(grouped.entries())
-    .sort(([aKey], [bKey]) => {
+    .sort(([aKey, aValue], [bKey, bValue]) => {
+      // Get minimum sectionOrder from all posts in each section
+      const aOrder = Math.min(
+        ...aValue.posts.map((p) => p.sectionOrder ?? Infinity)
+      );
+      const bOrder = Math.min(
+        ...bValue.posts.map((p) => p.sectionOrder ?? Infinity)
+      );
+
+      // Sort by sectionOrder if both have it
+      if (aOrder !== Infinity && bOrder !== Infinity) {
+        if (aOrder !== bOrder) {
+          return aOrder - bOrder;
+        }
+      }
+
+      // Sections with order come before sections without
+      if (aOrder !== Infinity && bOrder === Infinity) {
+        return -1;
+      }
+      if (aOrder === Infinity && bOrder !== Infinity) {
+        return 1;
+      }
+
+      // For sections without order, root comes first, then alphabetical
       if (aKey === ROOT_SECTION_KEY) {
         return -1;
       }

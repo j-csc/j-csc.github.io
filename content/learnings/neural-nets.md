@@ -2,6 +2,7 @@
 title: Neural nets
 description: Foundational concepts on neural nets, mostly for intuition.
 date: 2025-11-08
+sectionOrder: 3
 ---
 
 ## Neural Nets

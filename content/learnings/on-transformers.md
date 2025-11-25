@@ -2,6 +2,7 @@
 title: On Transformers
 description: Learning notes on transformers
 date: 2025-11-11
+sectionOrder: 3
 ---
 
 ## Transformers

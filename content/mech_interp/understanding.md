@@ -2,6 +2,9 @@
 title: Understanding Mechanistic Interpretability
 description: Notes on mechanistic interpretability - intuition, prereqs and key ideas from "A Mathematical Framework for Transformer Circuits"
 date: 2025-11-15
+draft: false
+pinned: true
+sectionOrder: 1
 ---
 
 Heavily inspired by [this post on prereqs](https://lelouch.dev/blog/you-are-probably-not-dumb/), I wanted to write up the prerequisites I deemed necessary for me to understand and start playing around with **mechanistic interpretability** and understanding concepts of ["A Mathematical Framework for Transformer Circuits"](https://transformer-circuits.pub/2021/framework/index.html). This blog post covers most of my working study notes on mechanistic interpretability and different intuitions I tried drawing from and is by no means exhaustive.

@@ -23,6 +23,9 @@ export type PostMeta = {
   title: string;
   description?: string;
   date?: string;
+  draft?: boolean;
+  pinned?: boolean;
+  sectionOrder?: number;
 };
 
 export type Post = PostMeta & {
@@ -89,8 +92,26 @@ function slugToSegments(slug: string): string[] | null {
 
 export const getPostSlugs = cache(async (): Promise<string[]> => {
   const entries = await collectMarkdownEntries(contentDirectory);
-  return entries
-    .map((entry) => entry.slug)
+  const slugs = await Promise.all(
+    entries.map(async ({ slug, filePath }) => {
+      const file = await readMarkdownFile(filePath);
+      if (!file) {
+        return null;
+      }
+
+      const { data } = matter(file);
+
+      // Filter out drafts
+      if (data.draft === true) {
+        return null;
+      }
+
+      return slug;
+    })
+  );
+
+  return slugs
+    .filter((slug): slug is string => slug !== null)
     .sort((a, b) => a.localeCompare(b));
 });
 
@@ -104,18 +125,32 @@ export const getAllPosts = cache(async (): Promise<PostMeta[]> => {
       }
 
       const { data } = matter(file);
+
+      // Filter out drafts
+      if (data.draft === true) {
+        return null;
+      }
+
       return {
         slug,
         segments,
         title: data.title ?? slug,
         description: data.description,
-        date: data.date
+        date: data.date,
+        draft: data.draft,
+        pinned: data.pinned,
+        sectionOrder: data.sectionOrder
       } satisfies PostMeta;
     })
   );
 
   const definedPosts = posts.filter((post): post is PostMeta => post !== null);
   return definedPosts.sort((a, b) => {
+    // Pinned posts come first
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+
+    // Within each group (pinned or not), sort by date
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
     return dateB - dateA;
@@ -136,6 +171,12 @@ export const getPostBySlug = cache(async (slug: string): Promise<Post | null> =>
   }
 
   const { data, content } = matter(file);
+
+  // Block access to draft posts
+  if (data.draft === true) {
+    return null;
+  }
+
   const processed = await remark()
     .use(remarkMath)
     .use(remarkRehype, { allowDangerousHtml: true })
@@ -149,6 +190,9 @@ export const getPostBySlug = cache(async (slug: string): Promise<Post | null> =>
     title: data.title ?? slug,
     description: data.description,
     date: data.date,
+    draft: data.draft,
+    pinned: data.pinned,
+    sectionOrder: data.sectionOrder,
     content: processed.toString()
   } satisfies Post;
 });
