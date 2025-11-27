@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import './globals.css';
 import 'katex/dist/katex.min.css';
 
@@ -36,6 +37,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${newsreader.className} bg-white leading-relaxed text-slate-900 antialiased`}>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-EW9XQZESS2"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-EW9XQZESS2');
+          `}
+        </Script>
         <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-5 pb-16 pt-12 sm:px-6 lg:px-0">
           <header className="flex flex-col gap-3">
             <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Jason</h1>
